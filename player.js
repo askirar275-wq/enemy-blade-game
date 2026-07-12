@@ -106,23 +106,4 @@ function updatePlayer() {
 
 }
 
-// Game Loop Hook
-const oldLoop = gameLoop;
-
-gameLoop = function () {
-
-    updatePlayer();
-
-    updateCamera();
-
-    drawGround();
-    drawTrees();
-    drawTeaShop();
-    drawPlayer();
-
-    requestAnimationFrame(gameLoop);
-
-};
-
-// Restart Loop
-requestAnimationFrame(gameLoop);
+// 

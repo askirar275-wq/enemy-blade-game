@@ -1,156 +1,150 @@
+// ===== Canvas =====
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-window.addEventListener("resize", () => {
+function resize(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-});
+}
+resize();
+window.addEventListener("resize", resize);
 
+// ===== World =====
 const world = {
-    width: 5000,
-    height: 5000
+    width:4000,
+    height:4000
 };
 
+// ===== Camera =====
 const camera = {
-    x: 0,
-    y: 0
+    x:0,
+    y:0
 };
 
+// ===== Player =====
 const player = {
-    x: world.width / 2,
-    y: world.height / 2,
-    size: 40,
-    speed: 4,
-    color: "#ff4444"
+    x:2000,
+    y:2000,
+    radius:20,
+    color:"#2196f3",
+    speed:4
 };
 
-const teaShop = {
-    x: world.width / 2 + 250,
-    y: world.height / 2,
-    width: 90,
-    height: 90
-};
+// ===== Blades on Ground =====
+const blades=[];
 
-const trees = [];
+for(let i=0;i<100;i++){
 
-for (let i = 0; i < 150; i++) {
-    trees.push({
-        x: Math.random() * world.width,
-        y: Math.random() * world.height
+    blades.push({
+        x:Math.random()*world.width,
+        y:Math.random()*world.height,
+        taken:false
     });
+
 }
 
-function updateCamera() {
-    camera.x = player.x - canvas.width / 2;
-    camera.y = player.y - canvas.height / 2;
-}
+// ===== Draw Ground =====
+function drawGround(){
 
-function drawGround() {
+    ctx.fillStyle="#55b84a";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    ctx.fillStyle = "#72d65c";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle="#6dd15f";
 
-    ctx.strokeStyle = "#5cb84d";
+    for(let x=0;x<world.width;x+=100){
 
-    for (let x = 0; x < world.width; x += 100) {
         ctx.beginPath();
-        ctx.moveTo(x - camera.x, -camera.y);
-        ctx.lineTo(x - camera.x, world.height - camera.y);
+        ctx.moveTo(x-camera.x,-camera.y);
+        ctx.lineTo(x-camera.x,world.height-camera.y);
         ctx.stroke();
+
     }
 
-    for (let y = 0; y < world.height; y += 100) {
+    for(let y=0;y<world.height;y+=100){
+
         ctx.beginPath();
-        ctx.moveTo(-camera.x, y - camera.y);
-        ctx.lineTo(world.width - camera.x, y - camera.y);
+        ctx.moveTo(-camera.x,y-camera.y);
+        ctx.lineTo(world.width-camera.x,y-camera.y);
         ctx.stroke();
+
     }
+
 }
 
-function drawTrees() {
+// ===== Draw Blades =====
+function drawGroundBlades(){
 
-    ctx.fillStyle = "#1d6d2b";
+    blades.forEach(b=>{
 
-    trees.forEach(tree => {
+        if(b.taken) return;
 
-        ctx.beginPath();
-        ctx.arc(
-            tree.x - camera.x,
-            tree.y - camera.y,
-            18,
-            0,
-            Math.PI * 2
+        ctx.save();
+
+        ctx.translate(
+            b.x-camera.x,
+            b.y-camera.y
         );
-        ctx.fill();
+
+        ctx.rotate(Date.now()/300);
+
+        ctx.fillStyle="silver";
+
+        ctx.fillRect(-3,-18,6,36);
+
+        ctx.fillStyle="#654321";
+        ctx.fillRect(-6,10,12,5);
+
+        ctx.restore();
 
     });
 
 }
 
-function drawTeaShop() {
-
-    ctx.fillStyle = "#b87333";
-
-    ctx.fillRect(
-        teaShop.x - camera.x,
-        teaShop.y - camera.y,
-        teaShop.width,
-        teaShop.height
-    );
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "18px Arial";
-    ctx.fillText(
-        "Tea Shop",
-        teaShop.x - camera.x + 5,
-        teaShop.y - camera.y + 48
-    );
-
-}
-
-function drawPlayer() {
-
-    ctx.fillStyle = player.color;
+// ===== Draw Player =====
+function drawPlayer(){
 
     ctx.beginPath();
 
+    ctx.fillStyle=player.color;
+
     ctx.arc(
-        player.x - camera.x,
-        player.y - camera.y,
-        player.size / 2,
+        player.x-camera.x,
+        player.y-camera.y,
+        player.radius,
         0,
-        Math.PI * 2
+        Math.PI*2
     );
 
     ctx.fill();
 
 }
 
-function gameLoop() {
+// ===== Camera =====
+function updateCamera(){
 
-    // player.js की updatePlayer() यहाँ कॉल होगी
-    if (typeof updatePlayer === "function") {
+    camera.x=player.x-canvas.width/2;
+    camera.y=player.y-canvas.height/2;
+
+}
+
+// ===== Game Loop =====
+function gameLoop(){
+
+    if(typeof updatePlayer==="function"){
         updatePlayer();
     }
 
     updateCamera();
 
     drawGround();
-    drawTrees();
-    drawTeaShop();
 
-    if (typeof drawCoins === "function") {
-        drawCoins();
-    }
-
-    if (typeof collectCoins === "function") {
-        collectCoins();
-    }
+    drawGroundBlades();
 
     drawPlayer();
+
+    if(typeof updateBlades==="function"){
+        updateBlades();
+    }
 
     requestAnimationFrame(gameLoop);
 

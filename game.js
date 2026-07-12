@@ -141,11 +141,16 @@ function gameLoop(){
     drawGroundBlades();
 
     drawPlayer();
-    drawPlayerBlades();
-    drawEnemies();
-    if(typeof updateBlades==="function"){
-        updateEnemies();
-        updateBlades();
+drawPlayerBlades();
+drawEnemies();
+
+if(typeof updateEnemies==="function"){
+    updateEnemies();
+}
+
+if(typeof updateBlades==="function"){
+    updateBlades();
+}
     }
 
     requestAnimationFrame(gameLoop);
